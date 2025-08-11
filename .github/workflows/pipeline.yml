@@ -36,7 +36,7 @@ jobs:
           path: playwright-report/
           retention-days: 30
       - name: Deploy to render
-        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false' }}
+        if: ${{ github.event_name == 'push'}}
         uses: sws2apps/render-deployment@main #consider using pin for dependabot auto update
         with:
           serviceId: ${{ secrets.RENDER_SERVICE_ID }}
