@@ -35,6 +35,8 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+      - name: Debug condition
+        run: echo ${{github.env.CONDITION}}
       - name: Deploy to render
         if: ${{ github.event_name == 'push' && github.env.SKIP_CONDITION  == 'false'}}
         uses: sws2apps/render-deployment@main #consider using pin for dependabot auto update
