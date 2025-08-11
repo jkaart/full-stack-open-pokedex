@@ -1,6 +1,7 @@
 name: Deployment pipeline
 env:
   SKIP_CONDITION: $contains(join(github.event.commits.*.message),'#skip')
+  run: echo "$SKIP_CONDITION"
 on:
   push:
     branches:
