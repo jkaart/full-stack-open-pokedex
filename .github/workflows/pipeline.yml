@@ -36,7 +36,7 @@ jobs:
           path: playwright-report/
           retention-days: 30
       - name: Deploy to render
-        if: ${{ github.event_name == 'push' && github.env.SKIP_CONDITION  == 'false'}}
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == false}}
         uses: sws2apps/render-deployment@main #consider using pin for dependabot auto update
         with:
           serviceId: ${{ secrets.RENDER_SERVICE_ID }}
@@ -62,7 +62,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Bump version and push tag
-        if: ${{ github.event_name == 'push' && github.env.SKIP_CONDITION  == 'false'}}
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == false}}
         uses: anothrNick/github-tag-action@e528bc2b9628971ce0e6f823f3052d1dcd9d512c
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
