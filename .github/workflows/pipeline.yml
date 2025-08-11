@@ -1,5 +1,6 @@
 name: Deployment pipeline
-
+env:
+  SKIP_CONDITION: $contains(join(github.event.commits.*.message),'#skip')
 on:
   push:
     branches:
@@ -35,9 +36,21 @@ jobs:
           path: playwright-report/
           retention-days: 30
       - name: Deploy to render
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION == 'false' }}
         uses: sws2apps/render-deployment@main #consider using pin for dependabot auto update
         with:
           serviceId: ${{ secrets.RENDER_SERVICE_ID }}
           apiKey: ${{ secrets.RENDER_API_KEY }}
           multipleDeployment: false #optional, default true
+  tag_release:
+    if: ${{ github.env.SKIP_CONDITION  == 'false'}}
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bump version and push tag
+        if: ${{ github.event_name == 'push' }}
+        uses: anothrNick/github-tag-action@1.73.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
