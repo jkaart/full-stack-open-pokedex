@@ -6,8 +6,8 @@ on:
     branches:
       - main
   pull_request:
-      branches: [main]
-      types: [opened, synchronize]
+    branches: [main]
+    types: [opened, synchronize]
 
 jobs:
   simple_deployment_pipeline:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - name: Install dependencies
         run: npm install
       - name: Lint
@@ -42,6 +42,20 @@ jobs:
           serviceId: ${{ secrets.RENDER_SERVICE_ID }}
           apiKey: ${{ secrets.RENDER_API_KEY }}
           multipleDeployment: false #optional, default true
+      - name: Notification success
+        uses: rjstone/discord-webhook-notify@v2
+        if: success()
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: info
+          details: A new version of Pokedex deployed
+      - name: Notification fail
+        uses: rjstone/discord-webhook-notify@v2
+        if: failure()
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          severity: error
+          details: Build failed
   tag_release:
     if: ${{ github.env.SKIP_CONDITION  == 'false'}}
     needs: [simple_deployment_pipeline]
