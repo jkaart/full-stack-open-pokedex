@@ -36,33 +36,31 @@ jobs:
           path: playwright-report/
           retention-days: 30
       - name: Deploy to render
-        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == false}}
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == 'false'}}
         uses: sws2apps/render-deployment@main #consider using pin for dependabot auto update
         with:
           serviceId: ${{ secrets.RENDER_SERVICE_ID }}
           apiKey: ${{ secrets.RENDER_API_KEY }}
           multipleDeployment: false #optional, default true
       - name: Notification success
-        uses: rjstone/discord-webhook-notify@v2
-        if: success()
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == 'false' && success()}}
+        uses: sarisia/actions-status-discord@5ddd3b114a98457dd80a39b2f00b6a998cd69008
         with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          severity: info
-          details: A new version of Pokedex deployed
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          description: "A new version of Pokedex deployed"
       - name: Notification fail
-        uses: rjstone/discord-webhook-notify@v2
-        if: failure()
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == 'false' && failure()}}
+        uses: sarisia/actions-status-discord@5ddd3b114a98457dd80a39b2f00b6a998cd69008
         with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          severity: error
-          details: Build failed
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          description: "Build failed"
   tag_release:
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Bump version and push tag
-        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == false}}
+        if: ${{ github.event_name == 'push' && env.SKIP_CONDITION  == 'false'}}
         uses: anothrNick/github-tag-action@e528bc2b9628971ce0e6f823f3052d1dcd9d512c
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
